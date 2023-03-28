@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.wj.ssm.mapper.RoleMapper">
+
+    <!--删除role表中的角色-->
+    <delete id="deleteRole">
+        delete from role where id = #{id}
+    </delete>
+    <!--删除role_permission表中的关系-->
+    <delete id="delete_role_permission">
+        delete from role_permission where roleId = #{id}
+    </delete>
+    <!--删除users_role表中的关系-->
+    <delete id="delete_users_role">
+        delete from users_role where roleId = #{id}
+    </delete>
+
+
+
+    <!--添加权限-->
+    <insert id="addPermissionToRole">
+        insert into role_permission VALUES(#{permissionId},#{roleId})
+    </insert>
+
+
+    <!--添加权限前查询角色已经拥有哪些权限-->
+    <select id="findRoleByIdAndAllPermission" resultType="Permission">
+        SELECT
+        *
+        FROM
+        permission p
+        LEFT JOIN role_permission rp ON p.id = rp.permissionId
+        LEFT JOIN role r on r.id = rp.roleId
+        WHERE r.id not in (#{id})
+    </select>
+
+
+    <!--角色详情-->
+    <resultMap id="RoleResultType" type="Role" autoMapping="true">
+        <id property="id" column="rid"/>
+        <collection property="permissions" ofType="Permission" javaType="List" autoMapping="true">
+            <id property="id" column="pid"/>
+        </collection>
+    </resultMap>
+    <select id="findById" resultMap="RoleResultType">
+        SELECT
+        * ,
+        r.id rid,
+        p.id pid
+        FROM
+        role r
+        LEFT JOIN role_permission rp on r.id = rp.roleId
+        LEFT JOIN permission p on p.id = rp.permissionId
+        where r.id = #{id}
+    </select>
+
+
+
+    <!--查询所有角色-->
+    <select id="findAll" resultType="Role">
+        select * from role
+    </select>
+
+
+    <!--新增角色-->
+    <insert id="save">
+        insert into role (roleName,roleDesc) values (#{roleName},#{roleDesc});
+    </insert>
+
+
+
+</mapper>

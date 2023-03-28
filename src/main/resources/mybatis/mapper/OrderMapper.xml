@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.wj.ssm.mapper.OrderMapper">
+
+
+
+    <!--新增订单-->
+    <insert id="save">
+        insert into orders(
+        orderNum,
+        orderTime,
+        peopleCount,
+        orderDesc,
+        payType,
+        orderStatus,
+        productId,
+        memberId)
+        values(#{orderNum},
+        #{orderTime},
+        #{peopleCount},
+        #{orderDesc},
+        #{payType},
+        #{orderStatus},
+        #{productId},
+        #{memberId})
+    </insert>
+
+
+
+
+
+
+
+    <!--查看详情-->
+    <resultMap id="findByIdResultMap" type="Orders" autoMapping="true">
+        <!--映射Order自身-->
+        <id property="id" column="id"/>
+
+        <!--映射product-->
+        <association property="product" javaType="Product" autoMapping="true">
+            <id property="id" column="pid"/>
+        </association>
+
+        <!--映射member-->
+        <association property="member" javaType="Member" autoMapping="true">
+            <id property="id" column="mid"/>
+        </association>
+
+        <!--映射travellers-->
+        <collection property="travellers" javaType="List" ofType="Traveller" autoMapping="true">
+            <id property="id" column="tid"/>
+        </collection>
+
+    </resultMap>
+
+    <select id="findById" resultMap="findByIdResultMap">
+        SELECT
+        *,
+        o.id as oid,
+        p.id AS pid,
+        m.id AS mid,
+        t.id AS tid
+        FROM
+        orders o
+        LEFT JOIN product p ON o.productId = p.id
+        LEFT JOIN member m ON o.memberId = m.id
+        LEFT JOIN order_traveller ot ON ot.orderId = o.id
+        LEFT JOIN traveller t ON ot.travellerId = t.id
+        WHERE
+        o.id = #{id}
+    </select>
+
+
+
+
+
+
+    <!--查询所有订单-->
+    <resultMap id="findAllResultMap" type="Orders" autoMapping="true">
+        <!--映射Order自身-->
+        <id property="id" column="id"/>
+
+        <!--映射Product-->
+        <association property="product" javaType="Product" autoMapping="true">
+            <id property="id" column="id"/>
+        </association>
+    </resultMap>
+
+    <select id="findAll" resultMap="findAllResultMap">
+        SELECT
+        *
+        FROM
+        orders o,
+        product p
+        WHERE
+        o.productId = p.id
+    </select>
+
+
+</mapper>
